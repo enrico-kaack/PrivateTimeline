@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ek.de.privatetimeline">
+    package="de.ek.private_timeline">
 
     <application
         android:allowBackup="true"
@@ -11,9 +11,9 @@
         <meta-data android:name="DATABASE" android:value="timeline.db" />
         <meta-data android:name="VERSION" android:value="1" />
         <meta-data android:name="QUERY_LOG" android:value="true" />
-        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="de.ek.privatetimeline" />
+        <meta-data android:name="DOMAIN_PACKAGE_NAME" android:value="de.ek.private_timeline.persistence" />
         <activity
-            android:name=".MainActivity"
+            android:name="de.ek.private_timeline.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AddItemActivity"></activity>
+        <activity android:name="de.ek.private_timeline.AddItemActivity"></activity>
     </application>
 
 </manifest>

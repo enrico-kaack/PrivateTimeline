@@ -1,4 +1,4 @@
-package ek.de.privatetimeline;
+package de.ek.private_timeline;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

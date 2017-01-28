@@ -1,4 +1,4 @@
-package ek.de.privatetimeline;
+package ek.de.private_timeline;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

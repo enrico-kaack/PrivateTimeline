@@ -1,4 +1,4 @@
-package ek.de.privatetimeline;
+package ek.de.private_timeline;
 
 import org.junit.Test;
 
