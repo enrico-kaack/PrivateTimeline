@@ -35,7 +35,7 @@
                 android:text="MultiAutoCompleteTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/in_tags" />
+                android:id="@+id/multiAutoCompleteTextView" />
         </LinearLayout>
     </ScrollView>
 
@@ -46,5 +46,5 @@
         android:layout_gravity="bottom|end"
         app:fabSize="mini"
         app:srcCompat="@android:drawable/checkbox_on_background"
-        android:id="@+id/btn_save" />
+        android:id="@+id/floatingActionButton" />
 </android.support.design.widget.CoordinatorLayout>
