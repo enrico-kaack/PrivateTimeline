@@ -25,14 +25,14 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Name"
+                android:hint="Name"
                 android:ems="10"
                 android:id="@+id/in_content"
                 android:singleLine="false"
                 android:inputType="text|textMultiLine" />
 
             <MultiAutoCompleteTextView
-                android:text="MultiAutoCompleteTextView"
+                android:hint="Tags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/multiAutoCompleteTextView" />
@@ -46,5 +46,5 @@
         android:layout_gravity="bottom|end"
         app:fabSize="mini"
         app:srcCompat="@android:drawable/checkbox_on_background"
-        android:id="@+id/floatingActionButton" />
+        android:id="@+id/btn_save" />
 </android.support.design.widget.CoordinatorLayout>

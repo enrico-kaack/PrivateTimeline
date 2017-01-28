@@ -19,5 +19,7 @@ public class Tag  extends SugarRecord{
         this.tag = tag;
     }
 
-
+    public Tag(String tag) {
+        this.tag = tag;
+    }
 }
