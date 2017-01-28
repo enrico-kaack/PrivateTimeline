@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'org.greenrobot.greendao'
+
 
 android {
     compileSdkVersion 25
@@ -27,6 +27,6 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:design:25.1.0'
-    compile 'org.greenrobot:greendao:3.2.0'
+    compile 'com.github.satyan:sugar:1.4'
     testCompile 'junit:junit:4.12'
 }

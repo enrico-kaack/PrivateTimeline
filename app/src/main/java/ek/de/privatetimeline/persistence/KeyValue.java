@@ -1,16 +1,13 @@
 package ek.de.privatetimeline.persistence;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.Generated;
+
+import com.orm.SugarRecord;
 
 /**
  * Created by enrico on 28.01.17.
  */
-@Entity
-public class KeyValue {
-    @Id
-    private long id;
+
+public class KeyValue extends SugarRecord {
 
     private String key;
 
@@ -19,25 +16,6 @@ public class KeyValue {
     public KeyValue(String key, String value) {
         this.key = key;
         this.value = value;
-    }
-
-    @Generated(hash = 1737500805)
-    public KeyValue(long id, String key, String value) {
-        this.id = id;
-        this.key = key;
-        this.value = value;
-    }
-
-    @Generated(hash = 92014137)
-    public KeyValue() {
-    }
-
-    public long getId() {
-        return this.id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getKey() {
