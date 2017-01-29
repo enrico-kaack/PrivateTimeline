@@ -87,9 +87,7 @@ public class AddItemActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null){
             ArrayList<Image> images = data.getParcelableArrayListExtra(ImagePickerActivity.INTENT_EXTRA_SELECTED_IMAGES);
-            for (int i=0;i<images.size();i++){
                 saveImages(images);
-            }
 
         }
     }
@@ -122,28 +120,33 @@ public class AddItemActivity extends AppCompatActivity {
         realm.beginTransaction();
         TimelineObject timelineObject = realm.createObject(TimelineObject.class);
         timelineObject.setContent(((EditText)findViewById(R.id.in_content)).getText().toString());
-
+        realm.commitTransaction();
 
         //handle single image
         if (images != null && images.size() == 1){
+            realm.beginTransaction();
             timelineObject.setTyp(Typ.SINGLE_IMAGE);
-                KeyValue image_path_object = realm.createObject(KeyValue.class);
-                image_path_object.setKey("image_path");
-                image_path_object.setValue(images.get(0).getPath());
-                timelineObject.getAttributes().add(image_path_object);
-
+            KeyValue image_path_object = realm.createObject(KeyValue.class);
+            image_path_object.setKey("image_path");
+            image_path_object.setValue(images.get(0).getPath());
+            timelineObject.getAttributes().add(image_path_object);
+            realm.commitTransaction();
 
         }else if (images != null && images.size() > 1){
+            realm.beginTransaction();
             timelineObject.setTyp(Typ.MULTIPLE_IMAGES);
             KeyValue image_count = realm.createObject(KeyValue.class);
             image_count.setKey("image_count");
             image_count.setValue(String.valueOf(images.size()));
-
+            timelineObject.addAttribute(image_count);
+            realm.commitTransaction();
             for (int i=0; i< images.size();i++){
+                realm.beginTransaction();
                 KeyValue image_path_object = realm.createObject(KeyValue.class);
-                image_path_object.setKey("image_path" + String.valueOf(i+1));
+                image_path_object.setKey("image_path" + String.valueOf(i));
                 image_path_object.setValue(images.get(i).getPath());
                 timelineObject.getAttributes().add(image_path_object);
+                realm.commitTransaction();
             }
 
 
@@ -151,21 +154,22 @@ public class AddItemActivity extends AppCompatActivity {
 
 
         //handle tags
-        String[] split = in_tags.getText().toString().split(", ");
-        for (String tagExtracted : split) {
-
-            Tag tagMatching = realm.where(Tag.class).equalTo("tag", tagExtracted).findFirst();
-            if (tagMatching != null){
-                timelineObject.addTag(tagMatching);
-            }else{
-                Tag tag = realm.createObject(Tag.class);
-                tag.setTag(tagExtracted);
-                timelineObject.addTag(tag);
-                Log.d("tag saved", tag.getTag());
-            }
-
+        if (in_tags.getText().toString().length() > 0){
+            String[] split = in_tags.getText().toString().split(", ");
+            for (String tagExtracted : split) {
+                realm.beginTransaction();
+                Tag tagMatching = realm.where(Tag.class).equalTo("tag", tagExtracted).findFirst();
+                if (tagMatching != null){
+                    timelineObject.addTag(tagMatching);
+                }else{
+                    Tag tag = realm.createObject(Tag.class);
+                    tag.setTag(tagExtracted);
+                    timelineObject.addTag(tag);
+                    Log.d("tag saved", tag.getTag());
+                }
+                realm.commitTransaction();}
         }
-        realm.commitTransaction();
+
         finish();
     }
 
