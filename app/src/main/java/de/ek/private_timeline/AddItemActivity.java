@@ -127,6 +127,7 @@ public class AddItemActivity extends AppCompatActivity {
             }else{
                 Tag tag = realm.createObject(Tag.class);
                 tag.setTag(tagExtracted);
+                timelineObject.addTag(tag);
                 Log.d("tag saved", tag.getTag());
             }
             realm.commitTransaction();
