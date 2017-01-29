@@ -90,8 +90,11 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
                 View v2 = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item_single_image, parent, false);
                 ViewHolderSingleImage holder2 = new ViewHolderSingleImage(v2);
                 return holder2;
+            default:
+                View v3 = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item, parent, false);
+                ViewHolderText holder3 = new ViewHolderText(v3);
+                return holder3;
         }
-        return null;
 
     }
 
@@ -124,6 +127,16 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
                 Glide.with(context).load(item.getAttributeValue("image_path")).fitCenter().into(holderSingleImage.single_image);
                 break;
 
+            default:
+                ViewHolderText holderText3 = (ViewHolderText)holder;
+                holderText3.content.setText(list.get(position).getContent());
+
+                List<Chip> chipList3 = new ArrayList<>(item.getTags().size());
+                for (Tag t:item.getTags()) {
+                    chipList3.add(t);
+                }
+                holderText3.tagView.setChipList(chipList3);
+                holderText3.time.setText(dateFormat.format(item.getTime()));
         }
 
 

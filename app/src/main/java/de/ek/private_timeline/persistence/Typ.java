@@ -7,4 +7,5 @@ package de.ek.private_timeline.persistence;
 public class Typ {
     public static final int TEXT = 0;
     public static final int SINGLE_IMAGE = 1;
+    public static final int MULTIPLE_IMAGES = 2;
 }

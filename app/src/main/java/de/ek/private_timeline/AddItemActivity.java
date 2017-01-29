@@ -14,14 +14,18 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.nguyenhoanglam.imagepicker.activity.ImagePicker;
 import com.nguyenhoanglam.imagepicker.activity.ImagePickerActivity;
 import com.nguyenhoanglam.imagepicker.model.Image;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import de.ek.private_timeline.persistence.KeyValue;
@@ -35,10 +39,12 @@ public class AddItemActivity extends AppCompatActivity {
     final int PICK_IMAGE_REQUEST = 1;
 
     RealmResults<Tag> tags;
-    MultiAutoCompleteTextView in_tags;
+    private MultiAutoCompleteTextView in_tags;
+    private LinearLayout image_list;
     String[] tagArray;
     Realm realm;
-    private ArrayList<Image> images;
+    private List<Image> images = new ArrayList<>(3);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +68,7 @@ public class AddItemActivity extends AppCompatActivity {
             }
         });
 
-
+        image_list = (LinearLayout)findViewById(R.id.image_switch);
 
         in_tags = (MultiAutoCompleteTextView)findViewById(R.id.in_tags);
         tags = realm.where(Tag.class).findAll();
@@ -80,12 +86,31 @@ public class AddItemActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null){
-            images = data.getParcelableArrayListExtra(ImagePickerActivity.INTENT_EXTRA_SELECTED_IMAGES);
+            ArrayList<Image> images = data.getParcelableArrayListExtra(ImagePickerActivity.INTENT_EXTRA_SELECTED_IMAGES);
             for (int i=0;i<images.size();i++){
-                Log.d("images: ", images.get(i).getPath());
+                saveImages(images);
             }
 
         }
+    }
+
+    private void saveImages(ArrayList<Image> new_images){
+        for (Image img: new_images){
+            String path = FileHelper.copyFileToInternalStorage(img.getPath(), getFilesDir().getPath() + "/images/");
+            if (path != null){
+                img.setPath(path);
+                images.add(img);
+
+                ImageView imgView = new ImageView(this);
+                imgView.setAdjustViewBounds(true);
+                imgView.setMaxHeight(300);
+                image_list.addView(imgView);
+                Glide.with(this).load(path).fitCenter().into(imgView);
+            }else {
+                Toast.makeText(this, "Error while copying image into app storage", Toast.LENGTH_SHORT).show();
+            }
+        }
+
     }
 
     private void addImage() {
@@ -99,29 +124,37 @@ public class AddItemActivity extends AppCompatActivity {
         timelineObject.setContent(((EditText)findViewById(R.id.in_content)).getText().toString());
 
 
-        //handle an image
+        //handle single image
         if (images != null && images.size() == 1){
-            String path = FileHelper.copyFileToInternalStorage(images.get(0).getPath(), getFilesDir().getPath() + "/images/");
-            if (path != null) {
+            timelineObject.setTyp(Typ.SINGLE_IMAGE);
                 KeyValue image_path_object = realm.createObject(KeyValue.class);
                 image_path_object.setKey("image_path");
-                image_path_object.setValue(path);
-                Log.d("image copied to: ", path);
+                image_path_object.setValue(images.get(0).getPath());
                 timelineObject.getAttributes().add(image_path_object);
-                timelineObject.setTyp(Typ.SINGLE_IMAGE);
-            }else{
-                Toast.makeText(this, "Error while copying image into app storage", Toast.LENGTH_SHORT).show();
+
+
+        }else if (images != null && images.size() > 1){
+            timelineObject.setTyp(Typ.MULTIPLE_IMAGES);
+            KeyValue image_count = realm.createObject(KeyValue.class);
+            image_count.setKey("image_count");
+            image_count.setValue(String.valueOf(images.size()));
+
+            for (int i=0; i< images.size();i++){
+                KeyValue image_path_object = realm.createObject(KeyValue.class);
+                image_path_object.setKey("image_path" + String.valueOf(i+1));
+                image_path_object.setValue(images.get(i).getPath());
+                timelineObject.getAttributes().add(image_path_object);
             }
-        }else{
-            timelineObject.setTyp(Typ.TEXT);
+
+
         }
 
-        realm.commitTransaction();
 
+        //handle tags
         String[] split = in_tags.getText().toString().split(", ");
         for (String tagExtracted : split) {
-            realm.beginTransaction();
-            Tag tagMatching = realm.where(Tag.class).endsWith("tag", tagExtracted).findFirst();
+
+            Tag tagMatching = realm.where(Tag.class).equalTo("tag", tagExtracted).findFirst();
             if (tagMatching != null){
                 timelineObject.addTag(tagMatching);
             }else{
@@ -130,9 +163,15 @@ public class AddItemActivity extends AppCompatActivity {
                 timelineObject.addTag(tag);
                 Log.d("tag saved", tag.getTag());
             }
-            realm.commitTransaction();
-        }
 
+        }
+        realm.commitTransaction();
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        images = Collections.emptyList();
     }
 }
