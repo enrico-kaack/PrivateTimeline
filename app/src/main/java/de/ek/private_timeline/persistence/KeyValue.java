@@ -1,7 +1,6 @@
 package de.ek.private_timeline.persistence;
 
 
-import com.orm.SugarRecord;
 
 import io.realm.RealmObject;
 

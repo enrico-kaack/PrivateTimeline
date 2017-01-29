@@ -1,9 +1,6 @@
 package de.ek.private_timeline.persistence;
 
 
-
-import com.orm.SugarRecord;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

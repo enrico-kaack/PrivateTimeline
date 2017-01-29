@@ -11,9 +11,6 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.orm.SugarContext;
-
-import java.util.List;
 
 import de.ek.private_timeline.list.RecyclerViewAdapterTimeLine;
 import de.ek.private_timeline.persistence.TimelineObject;

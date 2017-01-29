@@ -34,6 +34,12 @@
                 android:id="@+id/in_tags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
+            <Button
+                android:text="Add image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/btn_add_img" />
         </LinearLayout>
     </ScrollView>
 

@@ -1,8 +1,7 @@
 package de.ek.private_timeline.persistence;
 
 
-import com.orm.SugarRecord;
-import com.orm.dsl.Unique;
+
 import com.plumillonforge.android.chipview.Chip;
 
 import io.realm.RealmObject;
@@ -13,7 +12,7 @@ import io.realm.RealmObject;
  */
 
 public class Tag  extends RealmObject implements Chip{
-    @Unique
+
     private String tag;
 
     public String getTag() {
