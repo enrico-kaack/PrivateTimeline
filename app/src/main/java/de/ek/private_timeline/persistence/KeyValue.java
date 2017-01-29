@@ -3,15 +3,20 @@ package de.ek.private_timeline.persistence;
 
 import com.orm.SugarRecord;
 
+import io.realm.RealmObject;
+
 /**
  * Created by enrico on 28.01.17.
  */
 
-public class KeyValue extends SugarRecord {
+public class KeyValue extends RealmObject {
 
     private String key;
 
     private String value;
+
+    public KeyValue() {
+    }
 
     public KeyValue(String key, String value) {
         this.key = key;

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import io.realm.RealmList;
+import io.realm.RealmObject;
 
 
 /**
@@ -15,7 +17,7 @@ import java.util.List;
  */
 
 
-public class TimelineObject extends SugarRecord{
+public class TimelineObject extends RealmObject{
 
     private int typ;
 
@@ -23,20 +25,20 @@ public class TimelineObject extends SugarRecord{
 
     private Date time;
 
-    private List<Tag> tags;
+    private RealmList<Tag> tags;
 
-    private List<KeyValue> attributes;
+    private RealmList<KeyValue> attributes;
 
     public TimelineObject(){
         this.time = new Date();
-        this.tags = new ArrayList<>(3);
-        this.attributes = new ArrayList<>(5);
+
     }
 
     public TimelineObject(int typ, String content) {
-        this();
         this.typ = typ;
         this.content = content;
+        this.time = new Date();
+
     }
 
     public int getTyp() {
@@ -67,7 +69,7 @@ public class TimelineObject extends SugarRecord{
         return tags;
     }
 
-    public void setTags(List<Tag> tags) {
+    public void setTags(RealmList<Tag> tags) {
         this.tags = tags;
     }
 
@@ -75,7 +77,7 @@ public class TimelineObject extends SugarRecord{
         return attributes;
     }
 
-    public void setAttributes(List<KeyValue> attributes) {
+    public void setAttributes(RealmList<KeyValue> attributes) {
         this.attributes = attributes;
     }
 
