@@ -87,4 +87,13 @@ public class TimelineObject extends RealmObject{
     public void addAttribute(String key, String value){
         this.attributes.add(new KeyValue(key, value));
     }
+
+    public String getAttributeValue(String key){
+        for (int i = 0; i<attributes.size();i++){
+            if (attributes.get(i).getKey().equalsIgnoreCase(key)){
+                return attributes.get(i).getValue();
+            }
+        }
+        return null;
+    }
 }

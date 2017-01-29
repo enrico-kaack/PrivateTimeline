@@ -3,6 +3,7 @@ package de.ek.private_timeline.list;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.plumillonforge.android.chipview.ChipView;
@@ -17,6 +18,7 @@ public class ViewHolderTimeLine extends RecyclerView.ViewHolder{
     TextView content;
     ChipView tagView;
     TextView time;
+    ImageView single_image;
 
     ViewHolderTimeLine(View itemView) {
         super(itemView);
@@ -24,5 +26,6 @@ public class ViewHolderTimeLine extends RecyclerView.ViewHolder{
         content = (TextView) itemView.findViewById(R.id.tv_content);
         tagView = (ChipView) itemView.findViewById(R.id.tag_list);
         time = (TextView) itemView.findViewById(R.id.tv_time);
+        single_image = (ImageView) itemView.findViewById(R.id.iv_single_img);
     }
 }

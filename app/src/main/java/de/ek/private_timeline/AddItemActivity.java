@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.Toast;
 
 import com.nguyenhoanglam.imagepicker.activity.ImagePicker;
 import com.nguyenhoanglam.imagepicker.activity.ImagePickerActivity;
@@ -23,8 +24,10 @@ import com.nguyenhoanglam.imagepicker.model.Image;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.ek.private_timeline.persistence.KeyValue;
 import de.ek.private_timeline.persistence.Tag;
 import de.ek.private_timeline.persistence.TimelineObject;
+import de.ek.private_timeline.persistence.Typ;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -35,6 +38,7 @@ public class AddItemActivity extends AppCompatActivity {
     MultiAutoCompleteTextView in_tags;
     String[] tagArray;
     Realm realm;
+    private ArrayList<Image> images;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +80,7 @@ public class AddItemActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null){
-            ArrayList<Image> images = data.getParcelableArrayListExtra(ImagePickerActivity.INTENT_EXTRA_SELECTED_IMAGES);
+            images = data.getParcelableArrayListExtra(ImagePickerActivity.INTENT_EXTRA_SELECTED_IMAGES);
             for (int i=0;i<images.size();i++){
                 Log.d("images: ", images.get(i).getPath());
             }
@@ -93,16 +97,37 @@ public class AddItemActivity extends AppCompatActivity {
         realm.beginTransaction();
         TimelineObject timelineObject = realm.createObject(TimelineObject.class);
         timelineObject.setContent(((EditText)findViewById(R.id.in_content)).getText().toString());
+
+
+        //handle an image
+        if (images != null && images.size() == 1){
+            String path = FileHelper.copyFileToInternalStorage(images.get(0).getPath(), getFilesDir().getPath() + "/images/");
+            if (path != null) {
+                KeyValue image_path_object = realm.createObject(KeyValue.class);
+                image_path_object.setKey("image_path");
+                image_path_object.setValue(path);
+                Log.d("image copied to: ", path);
+                timelineObject.getAttributes().add(image_path_object);
+                timelineObject.setTyp(Typ.SINGLE_IMAGE);
+            }else{
+                Toast.makeText(this, "Error while copying image into app storage", Toast.LENGTH_SHORT).show();
+            }
+        }else{
+            timelineObject.setTyp(Typ.TEXT);
+        }
+
         realm.commitTransaction();
 
         String[] split = in_tags.getText().toString().split(", ");
         for (String tagExtracted : split) {
             realm.beginTransaction();
-            Tag t = new Tag(tagExtracted);
-            timelineObject.addTag(t);
-            if (realm.where(Tag.class).equalTo("tag", tagExtracted).count() == 0){
-                realm.copyToRealm(t);
-                Log.d("tag saved", t.getTag());
+            Tag tagMatching = realm.where(Tag.class).endsWith("tag", tagExtracted).findFirst();
+            if (tagMatching != null){
+                timelineObject.addTag(tagMatching);
+            }else{
+                Tag tag = realm.createObject(Tag.class);
+                tag.setTag(tagExtracted);
+                Log.d("tag saved", tag.getTag());
             }
             realm.commitTransaction();
         }

@@ -12,11 +12,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
+import java.io.File;
+
 import de.ek.private_timeline.list.RecyclerViewAdapterTimeLine;
 import de.ek.private_timeline.persistence.TimelineObject;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
 public class MainActivity extends AppCompatActivity {
     RealmResults<TimelineObject> timelineObjectList;
@@ -34,7 +37,11 @@ public class MainActivity extends AppCompatActivity {
         Realm.init(getApplicationContext());
         realm = Realm.getDefaultInstance();
 
-        timelineObjectList = realm.where(TimelineObject.class).findAll();
+        //Init file system
+        File images = new File(getFilesDir().getPath() + "/images/");
+        images.mkdir();
+
+        timelineObjectList = realm.where(TimelineObject.class).findAll().sort("time", Sort.DESCENDING);
 
         RecyclerView rv_timeLine = (RecyclerView)findViewById(R.id.recycl_view);
         adapter = new RecyclerViewAdapterTimeLine(timelineObjectList, getApplication());
