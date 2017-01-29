@@ -25,14 +25,14 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Name"
+                android:hint="@string/in_text"
                 android:ems="10"
                 android:id="@+id/in_content"
                 android:inputType="text|textMultiLine" />
 
             <MultiAutoCompleteTextView
                 android:id="@+id/in_tags"
-                android:hint="fun, best friends"
+                android:hint="@string/in_tags"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

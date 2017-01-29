@@ -173,9 +173,5 @@ public class AddItemActivity extends AppCompatActivity {
         finish();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        images = Collections.emptyList();
-    }
+
 }
