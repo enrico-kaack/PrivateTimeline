@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.plumillonforge.android.chipview.Chip;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,10 +24,12 @@ import de.ek.private_timeline.persistence.TimelineObject;
 public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<ViewHolderTimeLine> {
     List<TimelineObject> list = Collections.emptyList();
     Context context;
+    DateFormat dateFormat;
 
     public RecyclerViewAdapterTimeLine(List<TimelineObject> list, Context context) {
         this.list = list;
         this.context = context;
+        dateFormat = DateFormat.getDateTimeInstance();
     }
 
     public void setNewData(List<TimelineObject> timelineObjectList) {
@@ -45,15 +48,16 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolderTimeLine holder, int position) {
-
+        TimelineObject item = list.get(position);
         //Use the provided View Holder on the onCreateViewHolder method to populate the current row on the RecyclerView
         holder.content.setText(list.get(position).getContent());
 
-        List<Chip> chipList = new ArrayList<>(list.get(position).getTags().size());
-        for (Tag t:list.get(position).getTags()) {
+        List<Chip> chipList = new ArrayList<>(item.getTags().size());
+        for (Tag t:item.getTags()) {
             chipList.add(t);
         }
         holder.tagView.setChipList(chipList);
+        holder.time.setText(dateFormat.format(item.getTime()));
     }
 
     @Override

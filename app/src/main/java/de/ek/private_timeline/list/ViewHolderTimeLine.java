@@ -16,11 +16,13 @@ import de.ek.private_timeline.R;
 public class ViewHolderTimeLine extends RecyclerView.ViewHolder{
     TextView content;
     ChipView tagView;
+    TextView time;
 
     ViewHolderTimeLine(View itemView) {
         super(itemView);
 
         content = (TextView) itemView.findViewById(R.id.tv_content);
         tagView = (ChipView) itemView.findViewById(R.id.tag_list);
+        time = (TextView) itemView.findViewById(R.id.tv_time);
     }
 }
