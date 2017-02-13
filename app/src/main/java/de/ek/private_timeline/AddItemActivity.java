@@ -27,23 +27,30 @@ import com.nguyenhoanglam.imagepicker.model.Image;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import de.ek.private_timeline.persistence.KeyValue;
 import de.ek.private_timeline.persistence.Tag;
 import de.ek.private_timeline.persistence.TimelineObject;
 import de.ek.private_timeline.persistence.Typ;
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 
 public class AddItemActivity extends AppCompatActivity {
     final int PICK_IMAGE_REQUEST = 1;
 
-    RealmResults<Tag> tags;
+    private EditText in_content;
     private MultiAutoCompleteTextView in_tags;
     private LinearLayout image_list;
+
     String[] tagArray;
+    RealmResults<Tag> tags;
+
     Realm realm;
     private List<Image> images = new ArrayList<>(3);
+
+    TimelineObject timelineObject;
 
 
     @Override
@@ -68,9 +75,66 @@ public class AddItemActivity extends AppCompatActivity {
             }
         });
 
+        in_content = (EditText)findViewById(R.id.in_content);
         image_list = (LinearLayout)findViewById(R.id.image_switch);
-
         in_tags = (MultiAutoCompleteTextView)findViewById(R.id.in_tags);
+
+        setTokenAdapter();
+
+        loadSavedItemToEdit(savedInstanceState);
+
+    }
+
+    private void loadSavedItemToEdit(Bundle savedInstanceState) {
+        String id = getIntent().getStringExtra("id");
+        if (id != null){
+            timelineObject = realm.where(TimelineObject.class).equalTo("id", id).findFirst();
+
+            if (timelineObject != null){
+                in_content.setText(timelineObject.getContent());
+
+                //tags
+                List<Tag> tags = timelineObject.getTags();
+                String tag_string = "";
+                for (Tag tag:tags){
+                    tag_string += tag.getText();
+                }
+                in_tags.setText(tag_string);
+
+                //single image
+                if (timelineObject.getTyp() == Typ.SINGLE_IMAGE){
+                    String image_path = timelineObject.getAttributeValue("image_path");
+                    images.add(new Image(0,image_path , image_path, false ));
+
+                    ImageView imgView = new ImageView(this);
+                    imgView.setAdjustViewBounds(true);
+                    imgView.setMaxHeight(300);
+                    image_list.addView(imgView);
+                    Glide.with(this).load(image_path).fitCenter().into(imgView);
+                }
+
+                //multiple images
+                if (timelineObject.getTyp() == Typ.MULTIPLE_IMAGES){
+                    int image_count = Integer.parseInt(timelineObject.getAttributeValue("image_count"));
+
+                    for (int i=0; i< image_count;i++){
+                        String image_path = timelineObject.getAttributeValue("image_path" + i);
+                        images.add(new Image(0,image_path , image_path, false ));
+                        ImageView imgView = new ImageView(this);
+                        imgView.setAdjustViewBounds(true);
+                        imgView.setMaxHeight(300);
+                        image_list.addView(imgView);
+                        Glide.with(this).load(image_path).fitCenter().into(imgView);
+                    }
+
+
+                }
+            }
+        }
+
+    }
+
+    private void setTokenAdapter() {
         tags = realm.where(Tag.class).findAll();
         tagArray = new String[tags.size()];
         for (int i = 0; i < tags.size(); i++){
@@ -80,7 +144,6 @@ public class AddItemActivity extends AppCompatActivity {
         in_tags.setAdapter(tagSuggestionAdapter);
         in_tags.setThreshold(2);
         in_tags.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
-
     }
 
     @Override
@@ -118,7 +181,12 @@ public class AddItemActivity extends AppCompatActivity {
 
     private void saveData() {
         realm.beginTransaction();
-        TimelineObject timelineObject = realm.createObject(TimelineObject.class);
+        if (timelineObject == null){
+            timelineObject = realm.createObject(TimelineObject.class, UUID.randomUUID().toString());
+        }else{
+            //clear additional data
+            timelineObject.clearAttributes();
+        }
         timelineObject.setContent(((EditText)findViewById(R.id.in_content)).getText().toString());
         realm.commitTransaction();
 

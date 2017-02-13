@@ -2,7 +2,6 @@ package de.ek.private_timeline.list;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,62 +27,75 @@ import de.ek.private_timeline.persistence.Typ;
  * Created by Enrico on 02.11.2016.
  */
 
-public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     List<TimelineObject> list = Collections.emptyList();
     Context context;
     DateFormat dateFormat;
+    RecyclerView rc_view;
 
-    class ViewHolderText extends RecyclerView.ViewHolder {
+    private ItemInteractionListener listener;
+
+    class ViewHolder extends RecyclerView.ViewHolder{
         TextView content;
         ChipView tagView;
         TextView time;
 
-        ViewHolderText(View itemView) {
+        private ItemInteractionListener listener;
+
+        ViewHolder(View itemView, final ItemInteractionListener listener) {
             super(itemView);
 
             content = (TextView) itemView.findViewById(R.id.tv_content);
             tagView = (ChipView) itemView.findViewById(R.id.tag_list);
             time = (TextView) itemView.findViewById(R.id.tv_time);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (listener != null){
+                        listener.onItemClick(getAdapterPosition());
+                    }
+                }
+            });
+
+
         }
     }
 
-    class ViewHolderSingleImage extends RecyclerView.ViewHolder {
-        TextView content;
-        ChipView tagView;
-        TextView time;
+    class ViewHolderText extends ViewHolder {
+
+        ViewHolderText(View itemView, ItemInteractionListener listener) {
+            super(itemView, listener);
+
+        }
+    }
+
+    class ViewHolderSingleImage extends ViewHolder {
         ImageView single_image;
 
-        ViewHolderSingleImage(View itemView) {
-            super(itemView);
-
-            content = (TextView) itemView.findViewById(R.id.tv_content);
-            tagView = (ChipView) itemView.findViewById(R.id.tag_list);
-            time = (TextView) itemView.findViewById(R.id.tv_time);
+        ViewHolderSingleImage(View itemView, ItemInteractionListener listener) {
+            super(itemView, listener);
             single_image = (ImageView) itemView.findViewById(R.id.iv_single_img);
+
+
         }
     }
 
-    class ViewHolderMultipleImage extends RecyclerView.ViewHolder {
-        TextView content;
-        ChipView tagView;
-        TextView time;
+    class ViewHolderMultipleImage extends ViewHolder {
         LinearLayout image_list;
 
-        ViewHolderMultipleImage(View itemView) {
-            super(itemView);
-
-            content = (TextView) itemView.findViewById(R.id.tv_content);
-            tagView = (ChipView) itemView.findViewById(R.id.tag_list);
-            time = (TextView) itemView.findViewById(R.id.tv_time);
+        ViewHolderMultipleImage(View itemView, ItemInteractionListener listener) {
+            super(itemView, listener);
             image_list = (LinearLayout) itemView.findViewById(R.id.image_list);
         }
     }
 
 
-    public RecyclerViewAdapterTimeLine(List<TimelineObject> list, Context context) {
+    public RecyclerViewAdapterTimeLine(List<TimelineObject> list, Context context, ItemInteractionListener listener) {
         this.list = list;
         this.context = context;
         dateFormat = DateFormat.getDateTimeInstance();
+        this.listener = listener;
     }
 
     public void setNewData(List<TimelineObject> timelineObjectList) {
@@ -102,19 +114,19 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
         switch (viewType){
             case Typ.TEXT:
                 View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item, parent, false);
-                ViewHolderText holder = new ViewHolderText(v);
+                ViewHolderText holder = new ViewHolderText(v, listener);
                 return holder;
             case Typ.SINGLE_IMAGE:
                 View v2 = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item_single_image, parent, false);
-                ViewHolderSingleImage holder2 = new ViewHolderSingleImage(v2);
+                ViewHolderSingleImage holder2 = new ViewHolderSingleImage(v2, listener);
                 return holder2;
             case Typ.MULTIPLE_IMAGES:
                 View v3 = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item_multiple_images, parent, false);
-                ViewHolderMultipleImage holder3 = new ViewHolderMultipleImage(v3);
+                ViewHolderMultipleImage holder3 = new ViewHolderMultipleImage(v3, listener);
                 return holder3;
             default:
                 View v0 = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item, parent, false);
-                ViewHolderText holder0 = new ViewHolderText(v0);
+                ViewHolderText holder0 = new ViewHolderText(v0, listener);
                 return holder0;
         }
 
@@ -158,7 +170,7 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
                 }
                 holderMultipleImage.tagView.setChipList(chipList3);
                 holderMultipleImage.time.setText(dateFormat.format(item.getTime()));
-
+                holderMultipleImage.image_list.removeAllViews();
                 for (int i = 0; i< Integer.parseInt(item.getAttributeValue("image_count"));i++){
                     ImageView imgView = new ImageView(context);
                     holderMultipleImage.image_list.addView(imgView);
@@ -182,6 +194,8 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
 
     }
 
+
+
     @Override
     public int getItemCount() {
         //returns the number of elements the RecyclerView will display
@@ -191,6 +205,10 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
+    }
+
+    public TimelineObject getObjectForPosition(int pos){
+        return list.get(pos);
     }
 
     // Insert a new item to the RecyclerView on a predefined position
@@ -205,6 +223,8 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
         list.remove(position);
         notifyItemRemoved(position);
     }
+
+    
 
 
 }

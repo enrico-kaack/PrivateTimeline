@@ -2,11 +2,14 @@ package de.ek.private_timeline.persistence;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 
 /**
@@ -15,6 +18,8 @@ import io.realm.RealmObject;
 
 
 public class TimelineObject extends RealmObject{
+    @PrimaryKey
+    private String id;
 
     private int typ;
 
@@ -37,6 +42,11 @@ public class TimelineObject extends RealmObject{
         this.time = new Date();
 
     }
+
+    public String getId() {
+        return id;
+    }
+
 
     public int getTyp() {
         return typ;
@@ -95,5 +105,9 @@ public class TimelineObject extends RealmObject{
             }
         }
         return null;
+    }
+
+    public void clearAttributes(){
+        this.attributes.deleteAllFromRealm();
     }
 }
