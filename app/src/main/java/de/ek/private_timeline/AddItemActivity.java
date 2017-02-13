@@ -8,8 +8,11 @@ import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -57,6 +60,7 @@ public class AddItemActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
+
         realm = Realm.getDefaultInstance();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.btn_save);
@@ -83,6 +87,30 @@ public class AddItemActivity extends AppCompatActivity {
 
         loadSavedItemToEdit(savedInstanceState);
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_add_item, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                if (timelineObject != null){
+                    realm.beginTransaction();
+                    timelineObject.deleteFromRealm();
+                    realm.commitTransaction();
+                    finish();
+                }
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void loadSavedItemToEdit(Bundle savedInstanceState) {

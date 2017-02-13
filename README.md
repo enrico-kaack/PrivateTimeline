@@ -15,10 +15,11 @@ Have you seen a movie or a serie,  where you want to put some of your thoughts d
 - create timeline entries
 - create and add tags to entries
 - add one or more images to an entry
+- edit (and) previous entries
 
 ## Planed Features
 - view images fullscreen
-- edit previous entries
+
 - share a video
 - share locations (such as a restaurant) based on GPS location and search
 - share documents (e.g. PDF files)
