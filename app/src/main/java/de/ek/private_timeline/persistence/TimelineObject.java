@@ -89,7 +89,8 @@ public class TimelineObject extends RealmObject{
     }
 
     public void addTag(Tag tag){
-        this.tags.add(tag);
+        if (!this.tags.contains(tag))
+            this.tags.add(tag);
     }
     public void addAttribute(KeyValue attribute){
         this.attributes.add(attribute);
