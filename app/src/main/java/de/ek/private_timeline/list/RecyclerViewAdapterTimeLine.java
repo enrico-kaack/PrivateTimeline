@@ -70,21 +70,10 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
         }
     }
 
-    class ViewHolderSingleImage extends ViewHolder {
-        ImageView single_image;
-
-        ViewHolderSingleImage(View itemView, ItemInteractionListener listener) {
-            super(itemView, listener);
-            single_image = (ImageView) itemView.findViewById(R.id.iv_single_img);
-
-
-        }
-    }
-
-    class ViewHolderMultipleImage extends ViewHolder {
+    class ViewHolderImages extends ViewHolder {
         LinearLayout image_list;
 
-        ViewHolderMultipleImage(View itemView, ItemInteractionListener listener) {
+        ViewHolderImages(View itemView, ItemInteractionListener listener) {
             super(itemView, listener);
             image_list = (LinearLayout) itemView.findViewById(R.id.image_list);
         }
@@ -116,14 +105,10 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
                 View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item, parent, false);
                 ViewHolderText holder = new ViewHolderText(v, listener);
                 return holder;
-            case Typ.SINGLE_IMAGE:
-                View v2 = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item_single_image, parent, false);
-                ViewHolderSingleImage holder2 = new ViewHolderSingleImage(v2, listener);
+            case Typ.IMAGES:
+                View v2 = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item_multiple_images, parent, false);
+                ViewHolderImages holder2 = new ViewHolderImages(v2, listener);
                 return holder2;
-            case Typ.MULTIPLE_IMAGES:
-                View v3 = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item_multiple_images, parent, false);
-                ViewHolderMultipleImage holder3 = new ViewHolderMultipleImage(v3, listener);
-                return holder3;
             default:
                 View v0 = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item, parent, false);
                 ViewHolderText holder0 = new ViewHolderText(v0, listener);
@@ -148,33 +133,22 @@ public class RecyclerViewAdapterTimeLine extends RecyclerView.Adapter<RecyclerVi
                 holderText.tagView.setChipList(chipList);
                 holderText.time.setText(dateFormat.format(item.getTime()));
                 break;
-            case Typ.SINGLE_IMAGE:
-                ViewHolderSingleImage holderSingleImage = (ViewHolderSingleImage)holder;
-                holderSingleImage.content.setText(list.get(position).getContent());
-
-                List<Chip> chipList2 = new ArrayList<>(item.getTags().size());
-                for (Tag t:item.getTags()) {
-                    chipList2.add(t);
-                }
-                holderSingleImage.tagView.setChipList(chipList2);
-                holderSingleImage.time.setText(dateFormat.format(item.getTime()));
-                Glide.with(context).load(item.getAttributeValue("image_path")).fitCenter().into(holderSingleImage.single_image);
-                break;
-            case Typ.MULTIPLE_IMAGES:
-                ViewHolderMultipleImage holderMultipleImage = (ViewHolderMultipleImage)holder;
-                holderMultipleImage.content.setText(list.get(position).getContent());
+            case Typ.IMAGES:
+                ViewHolderImages holderImages = (ViewHolderImages)holder;
+                holderImages.content.setText(list.get(position).getContent());
 
                 List<Chip> chipList3 = new ArrayList<>(item.getTags().size());
                 for (Tag t:item.getTags()) {
                     chipList3.add(t);
                 }
-                holderMultipleImage.tagView.setChipList(chipList3);
-                holderMultipleImage.time.setText(dateFormat.format(item.getTime()));
-                holderMultipleImage.image_list.removeAllViews();
-                for (int i = 0; i< Integer.parseInt(item.getAttributeValue("image_count"));i++){
+                holderImages.tagView.setChipList(chipList3);
+                holderImages.time.setText(dateFormat.format(item.getTime()));
+                holderImages.image_list.removeAllViews();
+                ArrayList<String> images = item.getImageList();
+                for (int i = 0; i< images.size();i++){
                     ImageView imgView = new ImageView(context);
-                    holderMultipleImage.image_list.addView(imgView);
-                    Glide.with(context).load(item.getAttributeValue("image_path" + i)).fitCenter().into(imgView);
+                    holderImages.image_list.addView(imgView);
+                    Glide.with(context).load(images.get(i)).fitCenter().into(imgView);
                 }
 
                 break;

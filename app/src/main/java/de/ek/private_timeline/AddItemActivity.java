@@ -33,6 +33,7 @@ import de.ek.private_timeline.io.FileCopier;
 import de.ek.private_timeline.io.FileCopierUpdate;
 import de.ek.private_timeline.io.FileHelper;
 import de.ek.private_timeline.persistence.KeyValue;
+import de.ek.private_timeline.persistence.Paths;
 import de.ek.private_timeline.persistence.Tag;
 import de.ek.private_timeline.persistence.TimelineObject;
 import de.ek.private_timeline.persistence.Typ;
@@ -40,22 +41,25 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 public class AddItemActivity extends AppCompatActivity implements FileCopierUpdate{
+    Realm realm;
+    TimelineObject timelineObject;
     final int PICK_IMAGE_REQUEST = 1;
 
+    //Layout Components
     private EditText in_content;
     private MultiAutoCompleteTextView in_tags;
     private LinearLayout image_list;
 
+    //Tags
     String[] tagArray;
     RealmResults<Tag> tags;
 
-    Realm realm;
-    private List<Image> images = new ArrayList<>(3);
-    private List<CopyFile> copyFiles = new ArrayList<>(3);
+    //Images
+    private ArrayList<String> images = new ArrayList<>(3);
     private List<CopyFile> succesfulCopiedFiles = new ArrayList<>(3);
     private int runningThreadCounter = 0;
 
-    TimelineObject timelineObject;
+
 
 
     @Override
@@ -131,31 +135,20 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
                 }
                 in_tags.setText(tag_string);
 
-                //single image
-                if (timelineObject.getTyp() == Typ.SINGLE_IMAGE){
-                    String image_path = timelineObject.getAttributeValue("image_path");
-                    images.add(new Image(0,image_path , image_path, false ));
 
-                    ImageView imgView = new ImageView(this);
-                    imgView.setAdjustViewBounds(true);
-                    imgView.setMaxHeight(300);
-                    image_list.addView(imgView);
-                    Glide.with(this).load(image_path).fitCenter().into(imgView);
-                }
+                //images
+                if (timelineObject.getTyp() == Typ.IMAGES){
+                    List<String> imgList = timelineObject.getImageList();
 
-                //multiple images
-                if (timelineObject.getTyp() == Typ.MULTIPLE_IMAGES){
-                    int image_count = Integer.parseInt(timelineObject.getAttributeValue("image_count"));
-
-                    for (int i=0; i< image_count;i++){
-                        String image_path = timelineObject.getAttributeValue("image_path" + i);
-                        images.add(new Image(0,image_path , image_path, false ));
+                    for (int i=0; i< imgList.size();i++){
+                        images.add(imgList.get(i));
                         ImageView imgView = new ImageView(this);
                         imgView.setAdjustViewBounds(true);
                         imgView.setMaxHeight(300);
                         image_list.addView(imgView);
-                        Glide.with(this).load(image_path).fitCenter().into(imgView);
+
                     }
+                    loadImages();
 
 
                 }
@@ -186,11 +179,10 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
     }
 
     private void saveImages(ArrayList<Image> new_images){
+        List<CopyFile> copyFiles = new ArrayList<>(3);
         for (Image img: new_images){
-            String path = FileHelper.getNewRandomFileName(img.getPath(), getFilesDir().getPath() + "/images/");
+            String path = FileHelper.getNewRandomFileName(img.getPath(), getFilesDir().getPath() + Paths.IMAGE_FILE_PATH);
             copyFiles.add(new CopyFile(new File(img.getPath()), new File(path)));
-            img.setPath(path);
-            images.add(img);
 
             ImageView imgView = new ImageView(this);
             imgView.setAdjustViewBounds(true);
@@ -211,45 +203,23 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
     private void saveData() {
         if (runningThreadCounter > 0){
             Toast.makeText(getApplicationContext(), "Copying files in progress, please wait...", Toast.LENGTH_SHORT).show();
+            return;
         }
 
+        //modify the timeline object
         realm.beginTransaction();
         if (timelineObject == null){
             timelineObject = realm.createObject(TimelineObject.class, UUID.randomUUID().toString());
-        }else{
-            //clear additional data
-            timelineObject.clearAttributes();
         }
         timelineObject.setContent(((EditText)findViewById(R.id.in_content)).getText().toString());
         realm.commitTransaction();
 
-        //handle single image
-        if (succesfulCopiedFiles != null && succesfulCopiedFiles.size() == 1){
+        //modify additional images
+        if (images != null && images.size() > 0){
             realm.beginTransaction();
-            timelineObject.setTyp(Typ.SINGLE_IMAGE);
-            KeyValue image_path_object = realm.createObject(KeyValue.class);
-            image_path_object.setKey("image_path");
-            image_path_object.setValue(succesfulCopiedFiles.get(0).getDest().getPath());
-            timelineObject.getAttributes().add(image_path_object);
+            timelineObject.setTyp(Typ.IMAGES);
+            timelineObject.setImageList(images, realm);
             realm.commitTransaction();
-
-        }else if (succesfulCopiedFiles != null && succesfulCopiedFiles.size() > 1){
-            realm.beginTransaction();
-            timelineObject.setTyp(Typ.MULTIPLE_IMAGES);
-            KeyValue image_count = realm.createObject(KeyValue.class);
-            image_count.setKey("image_count");
-            image_count.setValue(String.valueOf(succesfulCopiedFiles.size()));
-            timelineObject.addAttribute(image_count);
-            realm.commitTransaction();
-            for (int i=0; i< succesfulCopiedFiles.size();i++){
-                realm.beginTransaction();
-                KeyValue image_path_object = realm.createObject(KeyValue.class);
-                image_path_object.setKey("image_path" + String.valueOf(i));
-                image_path_object.setValue(succesfulCopiedFiles.get(i).getDest().getPath());
-                timelineObject.getAttributes().add(image_path_object);
-                realm.commitTransaction();
-            }
-
 
         }
 
@@ -283,20 +253,40 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
     @Override
     public void onSuccess(ArrayList<CopyFile> succesFiles) {
         runningThreadCounter--;
-        succesfulCopiedFiles = succesFiles;
-        for (int i=0; i<succesFiles.size();i++){
-            Glide.with(this).load(succesFiles.get(i).getDest().getPath()).fitCenter().into((ImageView)image_list.getChildAt(i));
-        }
+        images.addAll(getImageListAsString(succesFiles));
+        loadImages();
     }
 
     @Override
     public void onFail(ArrayList<CopyFile> failedFiles, ArrayList<CopyFile> succesFiles) {
         runningThreadCounter--;
-        succesfulCopiedFiles = succesFiles;
-        for (int i=0; i<succesFiles.size();i++){
-            Glide.with(this).load(succesFiles.get(i).getDest().getPath()).fitCenter().into((ImageView)image_list.getChildAt(i));
-        }
+        images.addAll(getImageListAsString(succesFiles));
+        loadImages();
         Toast.makeText(getApplicationContext(), "Copy of files failed!", Toast.LENGTH_LONG).show();
 
+    }
+
+
+    private ArrayList<String> getImageListAsString(List<CopyFile> list){
+        ArrayList<String> imgList = new ArrayList<>();
+        for (CopyFile file : list){
+            imgList.add(file.getDest().getPath());
+        }
+        return imgList;
+    }
+
+
+    private ArrayList<String> getImageListAsString(){
+        ArrayList<String> imgList = new ArrayList<>();
+        for (CopyFile file : succesfulCopiedFiles){
+            imgList.add(file.getDest().getPath());
+        }
+        return imgList;
+    }
+
+    private void loadImages(){
+        for (int i=0; i<images.size();i++){
+            Glide.with(this).load(images.get(i)).fitCenter().into((ImageView)image_list.getChildAt(i));
+        }
     }
 }
