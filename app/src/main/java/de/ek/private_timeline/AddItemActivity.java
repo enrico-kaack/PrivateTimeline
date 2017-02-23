@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +35,9 @@ import de.ek.private_timeline.io.CopyFile;
 import de.ek.private_timeline.io.FileCopier;
 import de.ek.private_timeline.io.FileCopierUpdate;
 import de.ek.private_timeline.io.FileHelper;
+import de.ek.private_timeline.list.ItemInteractionListener;
+import de.ek.private_timeline.list.RecyclerViewAdapterPreview;
+import de.ek.private_timeline.list.RecyclerViewAdapterTimeLine;
 import de.ek.private_timeline.persistence.KeyValue;
 import de.ek.private_timeline.persistence.Paths;
 import de.ek.private_timeline.persistence.Tag;
@@ -40,7 +46,7 @@ import de.ek.private_timeline.persistence.Typ;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class AddItemActivity extends AppCompatActivity implements FileCopierUpdate{
+public class AddItemActivity extends AppCompatActivity implements FileCopierUpdate, ItemInteractionListener{
     Realm realm;
     TimelineObject timelineObject;
     final int PICK_IMAGE_REQUEST = 1;
@@ -48,7 +54,6 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
     //Layout Components
     private EditText in_content;
     private MultiAutoCompleteTextView in_tags;
-    private LinearLayout image_list;
 
     //Tags
     String[] tagArray;
@@ -58,6 +63,9 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
     private ArrayList<String> images = new ArrayList<>(3);
     private List<CopyFile> succesfulCopiedFiles = new ArrayList<>(3);
     private int runningThreadCounter = 0;
+
+    //PreviewList
+    private RecyclerViewAdapterPreview adapter;
 
 
 
@@ -86,8 +94,14 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
         });
 
         in_content = (EditText)findViewById(R.id.in_content);
-        image_list = (LinearLayout)findViewById(R.id.image_switch);
         in_tags = (MultiAutoCompleteTextView)findViewById(R.id.in_tags);
+
+        //RecycleView
+        RecyclerView rv_timeLine = (RecyclerView)findViewById(R.id.preview_recyc_view);
+        adapter = new RecyclerViewAdapterPreview(images, getApplication(), this);
+        rv_timeLine.setAdapter(adapter);
+        rv_timeLine.setHasFixedSize(true);
+        rv_timeLine.setLayoutManager(new GridLayoutManager(getApplicationContext(), 4));
 
         setTokenAdapter();
 
@@ -142,10 +156,6 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
 
                     for (int i=0; i< imgList.size();i++){
                         images.add(imgList.get(i));
-                        ImageView imgView = new ImageView(this);
-                        imgView.setAdjustViewBounds(true);
-                        imgView.setMaxHeight(300);
-                        image_list.addView(imgView);
 
                     }
                     loadImages();
@@ -184,10 +194,6 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
             String path = FileHelper.getNewRandomFileName(img.getPath(), getFilesDir().getPath() + Paths.IMAGE_FILE_PATH);
             copyFiles.add(new CopyFile(new File(img.getPath()), new File(path)));
 
-            ImageView imgView = new ImageView(this);
-            imgView.setAdjustViewBounds(true);
-            imgView.setMaxHeight(300);
-            image_list.addView(imgView);
         }
 
         FileCopier copier = new FileCopier(this);
@@ -285,8 +291,12 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
     }
 
     private void loadImages(){
-        for (int i=0; i<images.size();i++){
-            Glide.with(this).load(images.get(i)).fitCenter().into((ImageView)image_list.getChildAt(i));
-        }
+        adapter.setNewData(images);
+    }
+
+    @Override
+    public void onItemClick(int pos) {
+        images.remove(pos);
+        adapter.setNewData(images);
     }
 }
