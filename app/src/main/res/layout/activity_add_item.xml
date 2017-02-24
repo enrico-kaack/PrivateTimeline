@@ -36,11 +36,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <Button
+            <ImageButton
                 android:text="Add image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/btn_add_img" />
+                android:layout_height="70dp"
+                android:id="@+id/btn_add_img"
+                app:srcCompat="@drawable/ic_add_a_photo_white_48dp"
+                android:scaleType="fitCenter" />
 
            <android.support.v7.widget.RecyclerView
                android:layout_width="match_parent"
@@ -56,6 +58,6 @@
         android:clickable="true"
         android:layout_gravity="bottom|end"
         app:fabSize="mini"
-        app:srcCompat="@android:drawable/checkbox_on_background"
+        app:srcCompat="@drawable/ic_save_white_48dp"
         android:id="@+id/btn_save" />
 </android.support.design.widget.CoordinatorLayout>

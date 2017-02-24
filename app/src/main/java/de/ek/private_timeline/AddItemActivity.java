@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MultiAutoCompleteTextView;
@@ -85,7 +86,7 @@ public class AddItemActivity extends AppCompatActivity implements FileCopierUpda
             }
         });
 
-        Button btn_add_image = (Button)findViewById(R.id.btn_add_img);
+        ImageButton btn_add_image = (ImageButton)findViewById(R.id.btn_add_img);
         btn_add_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
