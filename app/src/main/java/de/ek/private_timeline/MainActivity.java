@@ -76,7 +76,9 @@ public class MainActivity extends AppCompatActivity implements ItemInteractionLi
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_impressum) {
+            Intent i = new Intent(MainActivity.this, ImpressumActivity.class);
+            startActivity(i);
             return true;
         }
 
